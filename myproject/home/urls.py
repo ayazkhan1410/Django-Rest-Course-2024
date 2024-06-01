@@ -24,6 +24,7 @@ urlpatterns = [
     
     # Class based views
     path('todo/', TodoView.as_view(), name='todo-list'),
+
 ]
 
-urlpatterns = router.urls
+urlpatterns += router.urls

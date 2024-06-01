@@ -6,6 +6,9 @@ from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
+# Authentication Part
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 class TodoViewSet(viewsets.ModelViewSet):
@@ -344,12 +347,33 @@ def delete_data(request):
             'message':'Something went wrong'
         })
 
-
 class TodoView(APIView):
+    authentication_classes = [TokenAuthentication]  
+    permission_classes = [IsAuthenticated]
     
+    def get(self, request):
+        try:
+            print(request.user)
+            todo_objs = Todo.objects.filter(user = request.user)
+            serializer = TodoSerializer(todo_objs, many=True)
+            return Response({
+                'status': 200,
+                'message': 'Retrieving the data',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': 500,
+                'message': 'Something went wrong'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
     def post(self, request):
         try:
             data = request.data
+            data['user'] = request.user.id
             serializer = TodoSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -364,23 +388,6 @@ class TodoView(APIView):
                     'message': 'Unable to create todo',
                     'data': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-        
-        except Exception as e:
-            print(e)
-            return Response({
-                'status': 500,
-                'message': 'Something went wrong'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def get(self, request):
-        try:
-            todo_objs = Todo.objects.all()
-            serializer = TodoSerializer(todo_objs, many=True)
-            return Response({
-                'status': 200,
-                'message': 'Retrieving the data',
-                'data': serializer.data
-            }, status=status.HTTP_200_OK)
         
         except Exception as e:
             print(e)

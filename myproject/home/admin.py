@@ -4,7 +4,7 @@ from .models import (Todo, TodoTiming)
 
 @admin.register(Todo)
 class AdminTodo(admin.ModelAdmin):
-    list_display = ['todo_title', 'todo_description', 'is_done', 'todo_age']
+    list_display = ['user', 'todo_title', 'todo_description', 'is_done', 'todo_age']
     list_per_page = 10
     search_fields = ['todo_title']
 
